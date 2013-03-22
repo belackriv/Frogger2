@@ -1,0 +1,56 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#the_stage {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+}
+
+#the_stage canvas {
+	border: 10px solid black;
+	-moz-border-radius: 20px;
+	-webkit-border-radius: 20px;
+	border-radius: 20px;
+}
+
+.map-tile img {
+  display: block;
+}
+
+.map-tilesheet .map-tilesheetnum{
+  font-weight: bold;
+}
+
+.map-tilesheet .map-tilesheetnum:after{
+  content: ' : ';  
+}
+
+.map-tile{
+  list-style-type: none;
+  margin: .25em;
+  padding: .25em;
+  border: 1px solid black;
+  border-radius: 5px;
+  float: left;
+}
+
+.map-tile .map-tilenum{
+  font-weight: bold;
+}
+
+.map-tile .map-tilenum:after{
+  content: ' : ';  
+}
+
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

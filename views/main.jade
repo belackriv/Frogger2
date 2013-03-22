@@ -1,0 +1,9 @@
+extends layout
+
+block content
+  script(src='/javascripts/main.js')
+  h1= title
+  ul
+    each map in maps
+      li 
+        a(href='/map/'+map.name) #{map.name}
