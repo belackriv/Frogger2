@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  script(src='/javascripts/map-tilelist.js')
+  h1= title
+  ul
+    each tileSheet, index in tileList
+      li.map-tilesheet 
+        span.map-tilesheetnum Tile Sheet ##{index}
+        span.map-tilesheetname #{tileSheet.image}
+        br
+        label(for='tilesheet_'+index) Hide Tile Sheet
+        input.button.maptilesheet-hide(id='tilesheet_'+index, type='checkbox') 
+        ul
+          each frame in tileSheet.frames
+            li.map-tile 
+              span.map-tilenum Tile ##{frame.tilenum}
+              span.map--tilename #{frame.filename}
+              img(src='/images/tiles/'+frame.filename)

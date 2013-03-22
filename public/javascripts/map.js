@@ -6,7 +6,7 @@ $(document).ready(function(){
     'Scroll Right': map.scrollRight,
     'Scroll Down' : map.scrollDown,
     'Zoom In' : map.zoomIn,
-    'Zoom Out' : map.zoomOut,
+    'Zoom Out' : map.zoomOut
   };
   var bindings = {
     37: 'Scroll Left',

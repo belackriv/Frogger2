@@ -9,15 +9,25 @@ function FroggerMap(containerId,viewportWidth,viewportHeight) {
   this.scale = {
     x: 1,
     y: 1
-  }
+  };
   this.viewport = {
     width: viewportWidth,
     height: viewportHeight
   };
   this.defaultFloatingTileIndex = 0;
-  this.bgLayer = $('<canvas>').attr('width',this.viewport.width).attr('height',this.viewport.height).css('position','absolute').get(0);
-	return this;
-};
+  this.bgLayer = $('<canvas>').attr('width',this.viewport.width).attr('height',this.viewport.height).css('float','left').get(0);
+  $('#'+containerId).append(this.bgLayer);
+  var mouseEdgeDectecterStyles = {
+    position: 'relative',
+    top: 32,
+    left: 32,
+    width: this.viewport.width - 64,
+    height: this.viewport.height - 64
+  };
+  this.mouseEdgeDectecter = $('<div>').attr('id','mouseEdgeDectecter').appendTo('#'+containerId).css(mouseEdgeDectecterStyles).get(0);
+  this.isScrolling = false;
+  return this;
+}
 
 FroggerMap.prototype.getScale = function(){
   return this.scale;
@@ -38,7 +48,7 @@ FroggerMap.prototype.setOffset = function(offset){
 FroggerMap.prototype.scrollLeft = function() {
   var self = this;
   var curOffset = self.getOffset();
-  var newOffset = {}; 
+  var newOffset = {};
   newOffset.x = curOffset.x + self.data.tileWidth;
   newOffset.y = curOffset.y;
   self.setOffset(newOffset);
@@ -48,7 +58,7 @@ FroggerMap.prototype.scrollLeft = function() {
 FroggerMap.prototype.scrollUp = function() {
   var self = this;
   var curOffset = self.getOffset();
-  var newOffset = {}; 
+  var newOffset = {};
   newOffset.x = curOffset.x;
   newOffset.y = curOffset.y + self.data.tileHeight;
   self.setOffset(newOffset);
@@ -58,7 +68,7 @@ FroggerMap.prototype.scrollUp = function() {
 FroggerMap.prototype.scrollRight = function() {
   var self = this;
   var curOffset = self.getOffset();
-  var newOffset = {}; 
+  var newOffset = {};
   newOffset.x = curOffset.x - self.data.tileWidth;
   newOffset.y = curOffset.y;
   self.setOffset(newOffset);
@@ -68,7 +78,7 @@ FroggerMap.prototype.scrollRight = function() {
 FroggerMap.prototype.scrollDown = function() {
   var self = this;
   var curOffset = self.getOffset();
-  var newOffset = {}; 
+  var newOffset = {};
   newOffset.x = curOffset.x;
   newOffset.y = curOffset.y - self.data.tileHeight;
   self.setOffset(newOffset);
@@ -78,9 +88,9 @@ FroggerMap.prototype.scrollDown = function() {
 FroggerMap.prototype.zoomIn = function() {
   var self = this;
   var curScale = self.getScale();
-  var newScale = {}; 
-  newScale.x = curScale.x + .2;
-  newScale.y = curScale.y + .2;
+  var newScale = {};
+  newScale.x = curScale.x + 0.2;
+  newScale.y = curScale.y + 0.2;
   self.setScale(newScale);
   self.render();
 };
@@ -88,9 +98,9 @@ FroggerMap.prototype.zoomIn = function() {
 FroggerMap.prototype.zoomOut = function() {
   var self = this;
   var curScale = self.getScale();
-  var newScale = {}; 
-  newScale.x = curScale.x - .2;
-  newScale.y = curScale.y - .2;
+  var newScale = {};
+  newScale.x = curScale.x - 0.2;
+  newScale.y = curScale.y - 0.2;
   self.setScale(newScale);
   self.render();
 };
@@ -100,14 +110,13 @@ FroggerMap.prototype.load = function(mapName, callback) {
   self.name = mapName;
   $.getJSON('/map/'+mapName, function(mapObj){
     self.data = mapObj;
-    $('#'+self.containerId).append(self.bgLayer);
     self.loadTiles(function(){
       self.loadEntities(mapName,function(){
         self.render();
         if(typeof callback === 'function'){
           callback();
         }
-      })
+      });
     });
   });
 };
@@ -161,25 +170,24 @@ FroggerMap.prototype.getGridAreaFromViewport = function(){
     gridYStart: Math.floor(gridYStart),
     gridXEnd: Math.ceil(gridXEnd),
     gridYEnd: Math.ceil(gridYEnd)
-  }
+  };
 };
 
 FroggerMap.prototype.getTileFromTileIndex = function(tileIndex){
   var self = this;
   var indexOffset = 0;
   var frames = null;
+  var tile = null;
   for(var i = 0; i < self.data.tileSheets.length; i++){
     frames = self.data.tileSheets[i].frames;
     if( typeof frames[tileIndex - indexOffset] !== 'undefined'){
-      var tile = frames[tileIndex - indexOffset];
+      tile = frames[tileIndex - indexOffset];
       tile.img =  self.data.tileSheets[i].img;
       return tile;
-    } 
+    }
     indexOffset += frames.length;
   }
-  
-  var tile = frames[localTileIndex]
-  self.data.tileSheets[self.tileSheetIndex].img;
+  return null;
 };
 
 FroggerMap.prototype.renderLayers = function(gridViewport,callback){
@@ -310,7 +318,12 @@ FroggerMap.prototype.bindViewportEvents = function(callback){
   });
   $('#'+self.containerId).on('mousedown', function(event){
     event.preventDefault();
-    console.log('mousedown');
+    var pos = self.getViewportMousePos(event);
+    var str ='EventType: '+event.type+', Target:'+event.target.tagName+' ; pos.x: '+pos.x+', pos.y: '+pos.y;
+     $('#teststuff').text(str);
+  });
+  $('#'+self.containerId).on('mouseover mouseleave', function(event){
+    self.checkViewportEdgeForScroll(event);
   });
   if(typeof callback === 'function'){
     callback();
@@ -320,6 +333,9 @@ FroggerMap.prototype.bindViewportEvents = function(callback){
 FroggerMap.prototype.addEntity = function(event,tileIndex,callback) {
   var self = this;
   var pos = self.getViewportMousePos(event,tileIndex);
+  var str ='EventType: '+event.type+', Target:'+event.target.tagName+' ; pos.x: '+pos.x+', pos.y: '+pos.y;
+  $('#teststuff').text(str);
+ /*
   var floatTile = new Kinetic.Image({
     x: pos.x,
     y: pos.y,
@@ -332,7 +348,7 @@ FroggerMap.prototype.addEntity = function(event,tileIndex,callback) {
     shadowEnabled: false
   });
   floatTile.mapTileIndex = tileIndex;
-  self.bindFloatingTileEvents(floatTile,function(){
+  self.bindEntityEvents(floatTile,function(){
     floatTile.setPosition( self.getTileStagePos(floatTile) );
     self.floatLayer.add(floatTile);
     self.checkTileInSpace(floatTile);
@@ -340,7 +356,7 @@ FroggerMap.prototype.addEntity = function(event,tileIndex,callback) {
     if(typeof callback === 'function'){
       callback();
     }
-  })
+  })*/
 };
 
 FroggerMap.prototype.bindEntityEvents = function(floatTile,callback){
@@ -364,7 +380,54 @@ FroggerMap.prototype.bindEntityEvents = function(floatTile,callback){
   }
 };
 
+FroggerMap.prototype.checkViewportEdgeForScroll= function(event){
+  var self = this;
+  var pos = self.getViewportMousePos(event);
+  var str ='EventType: '+event.type+', From: '+ event.fromElement.id + ', To: ' +event.toElement.id+', Target:'+event.target.tagName+' ; pos.x: '+pos.x+', pos.y: '+pos.y;
+  $('#teststuff').text(str);
+  if(event.type === 'mouseleave'){
+    clearInterval(self.doScroll);
+    self.isScrolling = false;
+  }else{
+    if(event.toElement.id == 'mouseEdgeDectecter'){
+      clearInterval(self.doScroll);
+      self.isScrolling = false;
+    }else{
+      if(!self.isScrolling){
+        self.doScroll = setInterval(function(){
+          if(pos.x < 32){
+            self.scrollLeft();
+          }
+          if(pos.x > self.viewport.width - 64){
+            self.scrollRight();
+          }
+          if(pos.y < 32){
+            self.scrollUp();
+          }
+          if(pos.y > self.viewport.height - 64){
+            self.scrollDown();
+          }
+        },1000 / 10 );
+      }
+    }
+  }
+};
+
 FroggerMap.prototype.getViewportMousePos = function(event,tileIndex){
+  console.log(event);
+  var self = this;
+  var tile = null;
+  if(typeof tileIndex ==='number'){
+    tile = self.getTileFromTileIndex(tileIndex);
+  }
+  var pos = {};
+  pos.x = event.pageX - $('#'+self.containerId).offset().left;
+  pos.y = event.pageY - $('#'+self.containerId).offset().top;
+  return pos;
+};
+
+FroggerMap.prototype.getMapMousePos = function(event,tileIndex){
+  console.log(event);
   var self = this;
   var tile = null;
   if(typeof tileIndex ==='number'){
@@ -384,7 +447,7 @@ FroggerMap.prototype.getViewportMousePos = function(event,tileIndex){
     canvasPos.y = ( pos.y + offset.y ) / scale.y;
   }
   return canvasPos;
-}
+};
 
 FroggerMap.prototype.getTileGridPos = function(tile){
   var self = this;

@@ -13,7 +13,7 @@ exports.getMap = function(req,res){
         var map = require('../public/data/maps/'+req.params.name);
         res.format({
           html: function(){
-            res.render('map', { title: req.params.name, map: map});
+            res.render('map', { title: req.params.name, map: map, stylesheets:['map']});
           },
           json: function(){
             res.json(map);
@@ -97,7 +97,7 @@ exports.listTiles = function(req,res){
         }
         res.format({
           html: function(){
-            res.render('map-tiles', { title: req.params.name, tileList: tileList});
+            res.render('map-tilelist', { title: req.params.name, tileList: tileList, stylesheets:['map-tilelist'] } );
           },
           json: function(){
             res.json(tileList);

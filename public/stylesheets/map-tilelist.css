@@ -1,0 +1,28 @@
+.map-tile img {
+  display: block;
+}
+
+.map-tilesheet .map-tilesheetnum{
+  font-weight: bold;
+}
+
+.map-tilesheet .map-tilesheetnum:after{
+  content: ' : ';  
+}
+
+.map-tile{
+  list-style-type: none;
+  margin: .25em;
+  padding: .25em;
+  border: 1px solid black;
+  border-radius: 5px;
+  float: left;
+}
+
+.map-tile .map-tilenum{
+  font-weight: bold;
+}
+
+.map-tile .map-tilenum:after{
+  content: ' : ';  
+}
